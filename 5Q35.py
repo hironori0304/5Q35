@@ -198,7 +198,7 @@ if uploaded_file is not None:
         st.session_state.highlighted_questions = st.session_state.incorrect_questions
 
     # 成績履歴表示
-    st.write("成績履歴:")
+    st.write("回答履歴:")
     if st.session_state.results_history:
         history_df = pd.DataFrame(st.session_state.results_history)
         st.write(history_df)
