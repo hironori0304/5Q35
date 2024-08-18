@@ -148,6 +148,7 @@ if uploaded_file is not None:
         total_questions = len(quizzes)
         highlighted_questions = set()
         incorrect_questions = set()
+        incorrect_questions_texts = []  # 間違った問題文のリスト
 
         for idx, quiz in enumerate(quizzes, start=1):
             is_correct = False
@@ -163,6 +164,7 @@ if uploaded_file is not None:
                 correct_count += 1
             else:
                 incorrect_questions.add(idx)
+                incorrect_questions_texts.append(quiz["question"])  # 間違った問題文を追加
 
         # 不正解の問題番号を保存
         st.session_state.highlighted_questions = incorrect_questions
@@ -181,7 +183,8 @@ if uploaded_file is not None:
             "回答回数": attempt_count,
             "問題数": total_questions,
             "正答数": correct_count,
-            "正答率": f"{accuracy:.2f}%"
+            "正答率": f"{accuracy:.2f}%",
+            "間違った問題": ', '.join(incorrect_questions_texts)  # 間違った問題文を追加
         }
 
         st.session_state.results_history.append(result)
@@ -193,7 +196,7 @@ if uploaded_file is not None:
         if accuracy == 100:
             st.success("全問正解です！ おめでとうございます！")
 
-    # 不正解問題ボタン
+      # 不正解問題ボタン
     if st.button('不正解問題（ハイライト表示）'):
         st.session_state.highlighted_questions = st.session_state.incorrect_questions
 
@@ -220,3 +223,4 @@ if (st.session_state.selected_years != st.session_state.previous_selected_years 
     st.session_state.attempt_count = 0
     st.session_state.previous_selected_years = st.session_state.selected_years.copy()
     st.session_state.previous_selected_categories = st.session_state.selected_categories.copy()
+
