@@ -30,6 +30,10 @@ def initialize_session_state():
         st.session_state.attempt_count = 0
     if 'incorrect_questions' not in st.session_state:
         st.session_state.incorrect_questions = set()
+    if 'previous_selected_years' not in st.session_state:
+        st.session_state.previous_selected_years = []
+    if 'previous_selected_categories' not in st.session_state:
+        st.session_state.previous_selected_categories = []
 
 initialize_session_state()
 
@@ -135,6 +139,10 @@ if uploaded_file is not None:
 
     # 回答ボタンを作成
     if st.button('回答'):
+        # 回答回数の更新
+        attempt_count = st.session_state.attempt_count + 1
+        st.session_state.attempt_count = attempt_count
+
         # 成績の計算と間違った問題のリストの更新
         correct_count = 0
         total_questions = len(quizzes)
@@ -161,19 +169,16 @@ if uploaded_file is not None:
         st.session_state.incorrect_questions = incorrect_questions
 
         # 回答履歴を保存
-        attempt_count = st.session_state.attempt_count + 1
-        st.session_state.attempt_count = attempt_count
-
         tokyo_tz = pytz.timezone('Asia/Tokyo')
         now = datetime.now(tokyo_tz).strftime("%Y-%m-%d %H:%M:%S")
 
         accuracy = correct_count / total_questions * 100
 
         result = {
-            "回答回数": attempt_count,
             "日時": now,
             "過去問": ', '.join(st.session_state.selected_years),
             "内容": ', '.join(st.session_state.selected_categories),
+            "回答回数": attempt_count,
             "問題数": total_questions,
             "正答数": correct_count,
             "正答率": f"{accuracy:.2f}%"
@@ -192,17 +197,26 @@ if uploaded_file is not None:
     if st.button('不正解問題（ハイライト表示）'):
         st.session_state.highlighted_questions = st.session_state.incorrect_questions
 
-    # 回答履歴を表示
-    st.write("回答履歴")
+    # 成績履歴表示
+    st.write("成績履歴:")
     if st.session_state.results_history:
-        results_df = pd.DataFrame(st.session_state.results_history)
-        st.dataframe(results_df)
-
+        history_df = pd.DataFrame(st.session_state.results_history)
+        st.write(history_df)
+        
         # ダウンロードボタン
-        csv = results_df.to_csv(index=False).encode('utf-8-sig')
+        csv = history_df.to_csv(index=False).encode('utf-8-sig')
         st.download_button(
             label="回答履歴をダウンロード",
             data=csv,
             file_name=f"回答履歴_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
             mime='text/csv'
         )
+
+
+
+# 新しい問題が選択された場合、回答回数をリセット
+if (st.session_state.selected_years != st.session_state.previous_selected_years or
+        st.session_state.selected_categories != st.session_state.previous_selected_categories):
+    st.session_state.attempt_count = 0
+    st.session_state.previous_selected_years = st.session_state.selected_years.copy()
+    st.session_state.previous_selected_categories = st.session_state.selected_categories.copy()
