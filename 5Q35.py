@@ -206,16 +206,14 @@ if uploaded_file is not None:
         history_df = pd.DataFrame(st.session_state.results_history)
         st.write(history_df)
         
-        # ダウンロードボタン
-        csv = history_df.to_csv(index=False).encode('utf-8-sig')
-        st.download_button(
-            label="回答履歴をダウンロード",
-            data=csv,
-            file_name=f"回答履歴_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime='text/csv'
-        )
-
-
+   # ダウンロードボタン
+    csv = history_df.to_csv(index=False, encoding='utf-8-sig')
+    st.download_button(
+                label="回答履歴をダウンロード",
+                data=csv,
+                file_name=f"回答履歴_{now}.csv",
+                mime='text/csv'
+            )
 
 # 新しい問題が選択された場合、回答回数をリセット
 if (st.session_state.selected_years != st.session_state.previous_selected_years or
